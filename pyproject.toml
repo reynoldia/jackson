@@ -1,0 +1,54 @@
+[project]
+name = "jackson"
+description = "Game server management bot"
+version = "0.1.0"
+dependencies = [
+  "discord.py==2.3.2",
+]
+
+[project.urls]
+repository = "https://github.com/reynoldia/jackson"
+documentation = "https://reynoldia.github.io/jackson/"
+
+[project.optional-dependencies]
+dev = [
+  "pre-commit==3.6.0",
+  "ruff==0.1.13",
+  "mypy==1.8.0",
+]
+tests = [
+  "pytest==7.4.4",
+  "pytest-randomly==3.15.0",
+]
+docs = [
+  "sphinx==7.2.6",
+  "furo==2023.9.10",
+  "sphinx-autoapi==3.0.0",
+  "releases==2.1.1",
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+preview = true
+unsafe-fixes = true
+target-version = "py312"
+select = ["ALL"]
+line-length = 120
+ignore = [
+    "CPY001", # (Missing copyright notice at top of file) - No license
+]
+
+[tool.ruff.extend-per-file-ignores]
+"docs/*" = [
+    "INP001", # (File `tests/*.py` is part of an implicit namespace package. Add an `__init__.py`.) - Docs are not modules
+]
+"tests/*" = [
+    "INP001", # (File `tests/*.py` is part of an implicit namespace package. Add an `__init__.py`.) - Tests are not modules
+    "S101", # (Use of `assert` detected) - Yes, that's the point
+]
+
+[tool.ruff.pydocstyle]
+convention = "numpy"
