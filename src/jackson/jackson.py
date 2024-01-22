@@ -46,7 +46,7 @@ def format_restart_message(returncode: int, stdout: str, stderr: str) -> str:
 
 async def _restart_service(service: str) -> tuple[int, str, str]:
     process = await asyncio.create_subprocess_shell(
-        f"/bin/systemctl restart {service}",
+        f"sudo /bin/systemctl restart {service}",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
