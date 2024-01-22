@@ -1,5 +1,6 @@
 """Game server management bot."""
 
+import asyncio
 from datetime import datetime, timedelta
 from typing import Literal, Self
 from zoneinfo import ZoneInfo
@@ -23,16 +24,45 @@ class MyClient(discord.Client):
         await self.tree.sync(guild=MY_GUILD)
 
 
-intents = discord.Intents.default()
+intents = discord.Intents.none()
 client = MyClient(intents=intents)
+
+
+def format_restart_message(returncode: int, stdout: str, stderr: str) -> str:
+    """Format restart results as a Discord message."""
+    return f"""---
+    [returncode] (if this number is not `0`, something went wrong)
+    `{returncode}`
+    [stdout]
+    ```
+    {stdout}
+    ```
+    [stderr]
+    ```
+    {stderr}
+    ```
+    """
+
+
+async def _restart_service(service: str) -> tuple[int, str, str]:
+    process = await asyncio.create_subprocess_shell(
+        f"/bin/systemctl restart {service}",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+
+    stdout, stderr = await process.communicate()
+    return process.returncode, stdout.decode(), stderr.decode()  # type: ignore[return-value] # When would this be None?
 
 
 @client.tree.command()
 @app_commands.describe(game="Which game to restart")
-@app_commands.checks.cooldown(1, 900, key=lambda i: i.guild_id)
-async def restart_game(interaction: discord.Interaction[MyClient], game: Literal["Project Zomboid"]) -> None:
+@app_commands.checks.cooldown(1, 900, key=lambda interaction: interaction.guild_id)
+async def restart_game(interaction: discord.Interaction[MyClient], game: Literal["zomboid"]) -> None:
     """Restart a game server."""
-    await interaction.response.send_message(f"Restarting {game}.")
+    await interaction.response.defer(thinking=True)
+    returncode, stdout, stderr = await _restart_service(game)
+    await interaction.followup.send(format_restart_message(returncode, stdout, stderr))
 
 
 @restart_game.error
