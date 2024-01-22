@@ -1,0 +1,14 @@
+[Unit]
+Description=Jackson
+After=network.target
+
+[Service]
+ExecStart=/opt/jackson/venv/bin/python3.12 -m jackson
+EnvironmentFile=/opt/jackson/jackson-env.list
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pzuser
+
+[Install]
+WantedBy=multi-user.target
